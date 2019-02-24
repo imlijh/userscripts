@@ -29,10 +29,10 @@ const addHyperLinks2MsgCards = function() {
     //title.innerHTML = `<a class="wh_title_link" href="${title.getAttribute('hrefs')}" target="_blank">${title.innerHTML}</a>`
     const link_node = document.createElement('a')
     link_node.setAttribute('target', '_blank')
+    link_node.appendChild(title.firstChild.cloneNode())
     link_node.className = 'wh_title_link'
     link_node.href = title.getAttribute('hrefs')
-    link_node.innerHTML = title.innerHTML
-    title.parentNode.replaceChild(link_node, title)
+    title.replaceChild(link_node, title.firstChild)
   }
 }
 
