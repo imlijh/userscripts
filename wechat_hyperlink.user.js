@@ -1,93 +1,96 @@
 // ==UserScript==
 // @name         Wechat Hyperlink Tweak
-// @namespace    k. Lee
-// @version      0.4
+// @namespace    https://github.com/imlijh/userscripts
+// @version      0.5
 // @description  Enhance hyperlinks in wechat (indended for Vimium link hints)
 // @author       k. Lee
 // @match        http*://weixin.sogou.com/weixin*
-// @match        http*://mp.weixin.qq.com/profile*
-// @match        http*://mp.weixin.qq.com/s*
+// @match        https://mp.weixin.qq.com/profile*
+// @match        https://mp.weixin.qq.com/s*
+// @run-at       document-end
 // @grant        GM_addStyle
 // ==/UserScript==
 
-(function() {
-  'use strict';
 
-  var postload = {
-    '/weixin': function() {openNewLinkOnSearchPageSelf(); },
-    '/profile': function() { addHyperLinks2MsgCards(); },
-    '/s': function() {changeProfileIdLink(); }
-  };
-
-  var path_lv1 = '/' + (window.location.pathname.split('/')[1] || '');
-  if(postload[path_lv1] !== undefined) {
-    window.addEventListener('load', postload[path_lv1]);
+const openNewLinkOnSearchPageSelf = function() {
+  const els = document.querySelectorAll('.news-box .txt-box a[uigs^="account_name_"]')
+  for (let el of els) {
+    el.setAttribute('target', '_self')
   }
+}
 
 
-  function openNewLinkOnSearchPageSelf() {
-    $('.news-box .txt-box a').attr('target', '_self');
+const addHyperLinks2MsgCards = function() {
+  // cascade hyper link css
+  GM_addStyle('a.wh_title_link {color: inherit !important;}')
+
+  const msgcard_titles = document.querySelectorAll('.weui_media_title')
+  for (let title of msgcard_titles) {
+    //title.innerHTML = `<a class="wh_title_link" href="${title.getAttribute('hrefs')}" target="_blank">${title.innerHTML}</a>`
+    const link_node = document.createElement('a')
+    link_node.setAttribute('target', '_blank')
+    link_node.className = 'wh_title_link'
+    link_node.href = title.getAttribute('hrefs')
+    link_node.innerHTML = title.innerHTML
+    title.parentNode.replaceChild(link_node, title)
   }
+}
 
 
-  function addHyperLinks2MsgCards() {
-    // cascade hyper link css
-    GM_addStyle('a.wh_title_link {color: inherit !important;}');
-
-    var msgcard_titles = document.getElementsByClassName('weui_media_title');
-    Array.prototype.forEach.call(msgcard_titles, function(title) {
-      var href = title.getAttribute('hrefs');
-      title.innerHTML = '<a class="wh_title_link" href="' + href + '" target="_blank">' + title.innerHTML + '</a>';
-    });
-  }
+const getOriginalUserId = function() {
+  // defined in an inline script in the document
+  return user_name
+}
 
 
-  function getOriginalUserId() {
-    var scripts = document.getElementsByTagName('script');
-    var user_id;
-    Array.prototype.forEach.call(scripts, function(script) {
-      var m;
-      if(!user_id && (m = script.innerHTML.match(/var\s+user_name\s*=\s*'(.+)';/))) {
-        user_id = m[1];
-      }
-    });
-    return user_id;
-  }
-
-
-  function getUserDefinedId() {
-    var metas = document.getElementById('profileBt').getElementsByClassName('profile_meta');
-    var user_id;
-    Array.prototype.forEach.call(metas, function(meta) {
-      if (meta.firstElementChild.textContent.trim() === 'WeChat ID' ||
-        meta.firstElementChild.textContent === '微信号') {
-        user_id = meta.lastElementChild.textContent;
-      }
-    });
-    return user_id;
-  }
-
-
-  function getUserNickName() {
-    var el = document.getElementById('profileBt').getElementsByClassName('profile_nickname')[0];
-    return el && el.textContent;
-  }
-
-
-  function changeProfileIdLink() {
-    var profile = document.getElementById('profileBt');
-    var a = profile.getElementsByTagName('a')[0];
-    var user_id;
-    if (a.getAttribute('href') === 'javascript:void(0);' && (user_id = getUserDefinedId() || getOriginalUserId())) {
-      a.setAttribute('href', '//weixin.sogou.com/weixin?type=1&query=' + user_id);
-      // force default action for click event
-      a.addEventListener('click', function(e){e.stopPropagation(); }, false);
-
-      //// git rid of the already-exist 'click' listeners
-      //// by [removing all event listeners](https://stackoverflow.com/questions/19469881/remove-all-event-listeners-of-specific-type/19470348)
-      //a.parentNode.replaceChild(a.cloneNode(true), a);
-      //a = profile.getElementsByTagName('a')[0];
-      //a.addEventListener('click', function(e){e.stopImmediatePropagation(); }, false);
+const getUserDefinedId = function() {
+  const metas = document.querySelectorAll('#profileBt .profile_meta > .profile_meta_label')
+  let user_id
+  for (let el of metas) {
+    if (el.textContent.trim() === 'WeChat ID' || el.textContent.trim() === '微信号') {
+      user_id = el.nextElementSibling.textContent.trim()
     }
   }
-})();
+  return user_id
+}
+
+
+const getUserNickName = function() {
+  const el = document.querySelector('#profileBt .profile_nickname')
+  return el && el.textContent
+}
+
+
+const changeProfileIdLink = function() {
+  const a = document.querySelector('#profileBt a')
+  let user_id
+  if (a && a.getAttribute('href') === 'javascript:void(0);' && (user_id = getUserDefinedId() || getOriginalUserId())) {
+    a.setAttribute('href', '//weixin.sogou.com/weixin?type=1&query=' + user_id)
+    // force default action for click event
+    a.addEventListener('click', e => { e.stopPropagation() }, false)
+
+    // get rid of the already-exist 'click' listeners
+    // by [removing all event listeners](https://stackoverflow.com/questions/19469881/remove-all-event-listeners-of-specific-type/19470348)
+    /*
+    a.parentNode.replaceChild(a.cloneNode(true), a)
+    cnost new_a = document.querySelector('#profileBt a')
+    new_a.addEventListener('click', e => { e.stopImmediatePropagation() }, false)
+    */
+  }
+}
+
+
+const run = function() {
+  const postload = {
+    '/weixin': () => { openNewLinkOnSearchPageSelf() },
+    '/profile':() => { addHyperLinks2MsgCards() },
+    '/s': () => { changeProfileIdLink() }
+  }
+
+  const path_lv1 = '/' + (window.location.pathname.split('/')[1] || '')
+  if(postload[path_lv1] !== undefined) {
+    window.addEventListener('load', postload[path_lv1])
+  }
+}
+
+run()
