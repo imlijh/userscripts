@@ -14,7 +14,7 @@
 
 const openNewLinkOnSearchPageSelf = function() {
   const els = document.querySelectorAll('.news-box .txt-box a[uigs^="account_name_"]')
-  for (let el of els) {
+  for (const el of els) {
     el.setAttribute('target', '_self')
   }
 }
@@ -25,7 +25,7 @@ const addHyperLinks2MsgCards = function() {
   GM_addStyle('a.wh_title_link {color: inherit !important;}')
 
   const msgcard_titles = document.querySelectorAll('.weui_media_title')
-  for (let title of msgcard_titles) {
+  for (const title of msgcard_titles) {
     //title.innerHTML = `<a class="wh_title_link" href="${title.getAttribute('hrefs')}" target="_blank">${title.innerHTML}</a>`
     const link_node = document.createElement('a')
     link_node.setAttribute('target', '_blank')
@@ -46,7 +46,7 @@ const getOriginalUserId = function() {
 const getUserDefinedId = function() {
   const metas = document.querySelectorAll('#profileBt .profile_meta > .profile_meta_label')
   let user_id
-  for (let el of metas) {
+  for (const el of metas) {
     if (el.textContent.trim() === 'WeChat ID' || el.textContent.trim() === '微信号') {
       user_id = el.nextElementSibling.textContent.trim()
     }
