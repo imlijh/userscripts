@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wechat Hyperlink Tweak
 // @namespace    https://github.com/imlijh/userscripts
-// @version      0.5
+// @version      0.5.3
 // @description  Enhance hyperlinks in wechat (indended for Vimium link hints)
 // @author       k. Lee
 // @match        http*://weixin.sogou.com/weixin*
@@ -26,13 +26,7 @@ const addHyperLinks2MsgCards = function() {
 
   const msgcard_titles = document.querySelectorAll('.weui_media_title')
   for (const title of msgcard_titles) {
-    //title.innerHTML = `<a class="wh_title_link" href="${title.getAttribute('hrefs')}" target="_blank">${title.innerHTML}</a>`
-    const link_node = document.createElement('a')
-    link_node.setAttribute('target', '_blank')
-    link_node.appendChild(title.firstChild.cloneNode())
-    link_node.className = 'wh_title_link'
-    link_node.href = title.getAttribute('hrefs')
-    title.replaceChild(link_node, title.firstChild)
+    title.innerHTML = `<a class="wh_title_link" href="${title.getAttribute('hrefs')}" target="_blank">${title.innerHTML}</a>`
   }
 }
 
