@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wechat Hyperlink Tweak
 // @namespace    https://github.com/imlijh/userscripts
-// @version      0.5.3
+// @version      0.6
 // @description  Enhance hyperlinks in wechat (indended for Vimium link hints)
 // @author       k. Lee
 // @match        http*://weixin.sogou.com/weixin*
